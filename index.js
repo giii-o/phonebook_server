@@ -1,8 +1,10 @@
 const express = require('express')
 const morgan = require('morgan')
+const cors = require('cors')
 
 const app = express()
 app.use(express.json())
+app.use(cors())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'))
 
 let persons = [
@@ -24,12 +26,12 @@ let persons = [
     {
       "name": "Mary Poppins ",
       "number": "1111111111111111111111",
-      "id": "c1SUgjwb1pk"
+      "id": "4"
     },
     {
       "name": "Candy apples",
       "number": "77777777777777",
-      "id": "qBigEUx2J2Q"
+      "id": "5"
     }
 ]
 
@@ -47,17 +49,28 @@ app.get('/api/persons/:id', (req, res) => {
     res.json(selectedPerson)
 })
 
+const genId = () => {
+    const existingID = persons.map(p => Number(p.id))
+    const newNum = Math.floor(Math.random()*99) + 1
+
+    if(existingID.includes(newNum)){
+        genId()
+    }else{
+        return newNum
+    }
+}
+
 app.post('/api/persons', (req, res) => {
     const body = req.body
 
     const newPerson = {
         name: body.name,
         number: body.number,
-        id: body.id
+        id: genId()
     }
 
     persons = persons.concat(newPerson)
-    res.status(204).end()
+    res.json(newPerson)
 })
 
 app.delete('/api/persons/:id', (req , res) => {
